@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}{{ 'titulo' }}{% endblock %}
+{% block content %}
+<h1>Fromulario de creación de producto </h1>
+<h1>{{ titulo }}</h1>
+<form method="POST">
+  {{ form.hidden_tag() }}
+<div class="field">
+     {{ form.cantidad.label }}>br/>
+     {{ form.cantidad(min=0) }}
+    {% for e in form.cantidad.errors %}<div class="error">{{ e }}</div>{% endfor %}
+  </div>
+ <div class="row">
+    <button class="btn primary" type="submit">{{ form.submit.label.text }}</button>
+    <a class="btn ghost" href="{{ url for('index') }}">cancelar</a>
+    <label>{{ form.cantidad.label }}</label>
+    {{ form.cantidad(class="input") }}
+    {% for e in form.cantidad.errors %}<small class="error">{{ e }}</small>{% endfor %}
+  </div>
+
+  <div class="form-group">
+    <label>{{ form.precio.label }}</label>
+    {{ form.precio(class="input") }}
+    {% for e in form.precio.errors %}<small class="error">{{ e }}</small>{% endfor %}
+  </div>
+
+  <div class="form-actions">
+    {{ form.submit(class="btn btn-primary") }}
+    <a class="btn btn-secondary" href="{{ url_for('listar_productos') }}">Cancelar</a>
+  </div>
+</form>
+{% endblock %}

@@ -1,0 +1,31 @@
+[20:26, 5/9/2025] Mari O.S: body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+header, footer {
+    background-color: #222;
+    color: white;
+    padding: 10px;
+    text-align: center;
+}
+
+nav a {
+    color: white;
+    margin: 0 10px;
+    text-decoration: none;
+}
+
+main {
+    padding: 20px;
+}
+[20:28, 5/9/2025] Mari O.S: About.html
+[20:28, 5/9/2025] Mari O.S: {% extends "base.html"%}
+{% block title %}Acerca de{% endblock %}
+
+{% block content %}
+<1>Acerca de</1>
+<p>Esta es la página de Acerca de.</p>
+<p>Información adicional sobre el sitio.</p>
+{% endblock}
