@@ -1,0 +1,5 @@
+[
+  {"id": 1, "nombre": "Manzana", "descripcion": "Fruta fresca", "precio": 0.5, "cantidad": 100},
+  {"id": 2, "nombre": "Teclado", "descripcion": "Teclado USB", "precio": 12.99, "cantidad": 25},
+  {"id": 3, "nombre": "Mouse", "descripcion": "Mouse óptico", "precio": 9.5, "cantidad": 40}
+]

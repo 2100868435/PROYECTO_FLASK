@@ -1,0 +1,23 @@
+# Entornos y archivos compilados
+__pycache__/
+*.pyc
+
+# Virtualenv
+venv/
+venv*/
+env/
+.env
+
+# IDEs y SO
+.vscode/
+.DS_Store
+
+# Bases locales y datos sensibles
+database/usuarios.db
+*.sqlite3
+*.db
+instance/
+.env.local
+
+# Otros
+*.log

@@ -1,0 +1,13 @@
+# .gitignore
+__pycache__/
+*.pyc
+instance/
+.env
+venv/
+venv*/
+.env/
+*.sqlite3
+database/usuarios.db
+.env.local
+.DS_Store
+.vscode/

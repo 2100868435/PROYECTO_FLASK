@@ -1,0 +1,49 @@
+[10:20, 15/9/2025] Maria: {% extends "base.html" %}
+{% block title %}Resultado{% endblock %}
+
+{% block content %}
+    <h2>Resultado del Formulario</h2>
+    <p>Gracias por enviar tu nombre, <strong>{{ nombre }}</strong>!</p>
+    <a href="{{ url_for('formulario') }}">Volver al formulario</a>
+{% endblock %}
+[10:22, 15/9/2025] Maria: {% extends 'base.html' %}
+
+{% block title %}Iniciar Sesión{% endblock %}
+
+{% block content %}
+<div class="container d-flex justify-content-center align-items-center vh-100">
+    <div class="card shadow p-4" style="width: 25rem;">
+        <h2 class="text-center mb-4">Iniciar Sesión</h2>
+
+        <!-- Mensajes flash -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <form method="post">
+            <div class="mb-3">
+                <label for="email" class="form-label">Correo electrónico:</label>
+                <input type="email" class="form-control" name="email" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="password" class="form-label">Contraseña:</label>
+                <input type="password" class="form-control" name="password" required>
+            </div>
+
+            <button type="submit" class="btn w-100 text-white" style="background-color:#7ee3ff;">Iniciar sesión</button>
+        </form>
+
+        <p class="mt-3 text-center">
+            ¿No tienes cuenta? <a href="{{ url_for('registro') }}">Regístrate aquí</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

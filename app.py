@@ -1,46 +1,144 @@
-#aplicaicon en flask
-from flask import Flask, render_template,redirect, url_for,flash, request
-from flask_wtf import flaskform
-from wtforms import stringfield, SubmitField
-from wtforms.validators import DataRequired, Length
+# app.py
+from flask import Flask, render_template, request, redirect, session
+from conexion.conexion import get_db_connection, create_tables
+import sqlite3
+import os
 
-app = Flask(_name_)
+app = Flask(__name__)
+app.secret_key = "tu_clave_secreta"  # cámbiala en producción
 
-# clave secreta para formulario
-app.config['SECRET_KEY']='mi_clave_secreta_123'
-# app.config['WTF_CSRF_SECRET_KEY']='mi_clave_csrf_123'
-
-
+# Asegurar que la BD y tablas existen
+create_tables()
 
 @app.route('/')
 def index():
-   # return "Hola, Mundo!!!!!!!"
-   return render_template('index.html', title='inicio')
+    if 'user_id' in session:
+        return redirect('/productos')
+    return redirect('/login')
 
-@app.route('/producto/nuevo', methods=['GET', 'POST']) 
-def nuevo_producto():
+# Registro
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        nombre = request.form['nombre']
+        email = request.form['email']
+        password = request.form['password']
+        conn = get_db_connection()
+        cur = conn.cursor()
+        try:
+            cur.execute("INSERT INTO usuarios (nombre, email, password) VALUES (?, ?, ?)",
+                        (nombre, email, password))
+            conn.commit()
+            conn.close()
+            return render_template('resultado.html', titulo="Registro exitoso",
+                                   mensaje="Usuario registrado correctamente.",
+                                   volver_url="/login")
+        except sqlite3.IntegrityError:
+            conn.close()
+            return render_template('resultado.html', titulo="Error",
+                                   mensaje="El email ya está en uso.",
+                                   volver_url="/register")
+    return render_template('registro.html')
 
-    class ProductoForm(FlaskForm):
-        nombre = Stringfield('nombre del producto', validators=[DataRequired(), Length(min=2, maz=50)])  
-        submit = SubmitmitField('Agregar Producto') 
+# Login
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM usuarios WHERE email = ? AND password = ?", (email, password))
+        user = cur.fetchone()
+        conn.close()
+        if user:
+            session['user_id'] = user['id']
+            session['user_name'] = user['nombre']
+            return redirect('/productos')
+        else:
+            return render_template('resultado.html', titulo="Error de login",
+                                   mensaje="Credenciales inválidas.",
+                                   volver_url="/login")
+    return render_template('login.html')
 
-        form = ProductoForm()
-        if form.validate_on_submit():
-            nombre_producto = form.nombre.data
-            flash(f'producto "{nombre_producto}" agregar con exito', 'success')
-            return redirect(url_for('index'))
-        
-        return render_template('form.html', title='Nuevo Producto', form=form)
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect('/login')
 
-@app.route('/usuario/<nombre!')
-def usuario(nombre):
-    retur f"Hola, {nombre!}"
+# Listar productos
+@app.route('/productos')
+def mostrar_productos():
+    if 'user_id' not in session:
+        return redirect('/login')
+    conn = get_db_connection()
+    productos = conn.execute("SELECT * FROM productos").fetchall()
+    conn.close()
+    return render_template('productos.html', productos=productos)
 
-@app.route('/about)
-def about():
-   # return "Esta es una aplicacion de ejemplo en flask."
-   return render_template('about.html',title='Acerca de')
+# Crear producto
+@app.route('/crear', methods=['GET', 'POST'])
+def crear_producto():
+    if 'user_id' not in session:
+        return redirect('/login')
+    if request.method == 'POST':
+        nombre = request.form['nombre']
+        descripcion = request.form.get('descripcion', '')
+        precio = float(request.form['precio'])
+        cantidad = int(request.form['cantidad'])
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("INSERT INTO productos (nombre, descripcion, precio, cantidad) VALUES (?, ?, ?, ?)",
+                    (nombre, descripcion, precio, cantidad))
+        conn.commit()
+        conn.close()
+        return redirect('/productos')
+    return render_template('crear_producto.html')
 
-@app.route('/contacto')
-def contacto():
-    return "contacto con nosotros en"
+# Editar producto
+@app.route('/editar/<int:id>', methods=['GET', 'POST'])
+def editar_producto(id):
+    if 'user_id' not in session:
+        return redirect('/login')
+    conn = get_db_connection()
+    cur = conn.cursor()
+    if request.method == 'POST':
+        nombre = request.form['nombre']
+        descripcion = request.form.get('descripcion', '')
+        precio = float(request.form['precio'])
+        cantidad = int(request.form['cantidad'])
+        cur.execute("UPDATE productos SET nombre=?, descripcion=?, precio=?, cantidad=? WHERE id=?",
+                    (nombre, descripcion, precio, cantidad, id))
+        conn.commit()
+        conn.close()
+        return redirect('/productos')
+    producto = conn.execute("SELECT * FROM productos WHERE id=?", (id,)).fetchone()
+    conn.close()
+    if producto is None:
+        return render_template('resultado.html', titulo="No encontrado",
+                               mensaje="Producto no encontrado.", volver_url="/productos")
+    return render_template('editar_producto.html', producto=producto)
+
+# Eliminar producto
+@app.route('/eliminar/<int:id>', methods=['POST'])
+def eliminar_producto(id):
+    if 'user_id' not in session:
+        return redirect('/login')
+    conn = get_db_connection()
+    conn.execute("DELETE FROM productos WHERE id=?", (id,))
+    conn.commit()
+    conn.close()
+    return redirect('/productos')
+
+# Ver usuarios (solo ejemplo)
+@app.route('/usuarios')
+def usuarios():
+    if 'user_id' not in session:
+        return redirect('/login')
+    conn = get_db_connection()
+    usuarios = conn.execute("SELECT id, nombre, email FROM usuarios").fetchall()
+    conn.close()
+    return render_template('usuarios_formulario.html', usuarios=usuarios)
+
+if __name__ == '__main__':
+    app.run(debug=True)

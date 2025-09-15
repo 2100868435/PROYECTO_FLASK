@@ -1,7 +1,16 @@
-{% extends "base.html"%}
-{% block title %}inicio{% endblock %}
+{% extends "base.html" %}
+
+{% block title %}Formulario{% endblock %}
 
 {% block content %}
-<1>Bienvenido a mi sitio flask</1>
-<p>Esta es la página de inicio.</p>
-{% endblock}
+    <h2>Formulario</h2>
+
+    <form method="POST">
+        {{ form.hidden_tag() }}
+
+        <p>
+            {{ form.nombre.label }}<br>
+            {{ form.nombre(size=30) }}
+            {% if form.nombre.errors %}
+                {% for error in form.nombre.errors %}
+                    <span style=
